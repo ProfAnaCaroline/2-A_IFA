@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard Programação</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins', sans-serif;
+    background: linear-gradient(135deg,#0f766e,#14b8a6);
+    padding:30px;
+    color:#222;
+}
+
+h1{
+    text-align:center;
+    color:white;
+    margin-bottom:30px;
+    font-size:2.3rem;
+}
+
+.dashboard{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    justify-content:center;
+    margin-bottom:35px;
+}
+
+.grafico-box{
+    background:white;
+    width:750px;
+    min-height:480px;
+    border-radius:25px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+    padding:25px;
+}
+
+.qrcode-box{
+    background:white;
+    width:320px;
+    min-height:480px;
+    border-radius:25px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.15);
+    padding:25px;
+    text-align:center;
+}
+
+.qrcode-box img{
+    width:220px;
+    margin-top:15px;
+}
+
+.qrcode-box h2{
+    margin-bottom:15px;
+}
+
+.qrcode-box p{
+    color:#555;
+}
+
+select{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+    border:none;
+    background:#f3f4f6;
+    font-size:16px;
+    margin-bottom:20px;
+    font-family:'Poppins';
+}
+
+#grafico{
+    width:100%;
+    height:350px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+}
+
+.card{
+    padding:30px;
+    border-radius:25px;
+    color:white;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card h2{
+    margin-bottom:20px;
+}
+
+.programacao{
+    background:linear-gradient(135deg,#4f46e5,#7c3aed);
+}
+
+.fisica{
+    background:linear-gradient(135deg,#059669,#10b981);
+}
+
+.robotica{
+    background:linear-gradient(135deg,#ea580c,#f97316);
+}
+
+.card p{
+    line-height:1.8;
+    text-align:justify;
+}
+
+.destaque{
+    font-weight:600;
+}
+
+@media(max-width:900px){
+
+    .grafico-box,
+    .qrcode-box{
+        width:100%;
+    }
+
+}
+
+</style>
+</head>
+<body>
+
+<h1>Resultados do Google Forms</h1>
+
+<div class="dashboard">
+
+    <div class="grafico-box">
+
+        <select id="perguntaSelect">
+            <option value="gosto">
+                De 0 a 10 o quanto você gosta de programação?
+            </option>
+
+            <option value="linguagens">
+                Quais das opções abaixo correspondem à linguagens de programação?
+            </option>
+
+            <option value="algoritmo">
+                O que é um algoritmo?
+            </option>
+        </select>
+
+        <div id="grafico"></div>
+
+    </div>
+
+    <div class="qrcode-box">
+        <h2>Responder Pesquisa</h2>
+
+        <p>Escaneie o QR Code para responder ao formulário.</p>
+
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://forms.gle/spGKzqy55jTkzU7aA">
+
+    </div>
+
+</div>
+
+<div class="cards">
+
+<div class="card programacao">
+<h2>Programação</h2>
+
+<p>
+No decorrer do primeiro trimestre, as aulas de
+<span class="destaque">Programação</span>
+foram voltadas à compreensão dos diferentes tipos de
+<span class="destaque">Inteligências Artificiais (IAs)</span>
+e de suas funcionalidades.
+Além disso, os alunos aprenderam a realizar pesquisas
+por meio da criação de formulários on-line,
+especialmente utilizando o
+<span class="destaque">Google Forms</span>.
+</p>
+
+<p>
+Após a realização de pesquisas-teste, os estudantes
+aprenderam a gerar gráficos com o uso de planilhas,
+com ênfase no
+<span class="destaque">Google Planilhas</span>.
+</p>
+
+</div>
+
+<div class="card fisica">
+
+<h2>Física</h2>
+
+<p>
+As aulas de
+<span class="destaque">Física</span>
+foram voltadas ao estudo da
+<span class="destaque">1ª Lei de Ohm</span>
+e das
+<span class="destaque">Ondas Eletromagnéticas</span>,
+relacionando conceitos científicos com tecnologias
+presentes no cotidiano.
+</p>
+
+<p>
+Os conteúdos serão articulados de forma
+interdisciplinar com Programação por meio da análise
+de dados e construção de gráficos.
+</p>
+
+</div>
+
+<div class="card robotica">
+
+<h2>Robótica</h2>
+
+<p>
+RESUMO SAMUEL
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+google.charts.load('current', {
+    packages:['corechart']
+});
+
+google.charts.setOnLoadCallback(carregarDados);
+
+const sheetURL =
+'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAD-j7vzLTjXVse3wL9cB6KTf-V-7D1wYYZElpWaJJS_Fxy-2uKdsHajsB8LEjnGbA8JULgQVhMdnF/pub?output=csv';
+
+let respostas = [];
+
+async function carregarDados(){
+
+    const response = await fetch(sheetURL);
+    const texto = await response.text();
+
+    const linhas =
+    texto.split('\n').map(linha =>
+        linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
+    );
+
+    respostas = linhas.slice(1);
+
+    desenharGrafico();
+
+    document
+    .getElementById('perguntaSelect')
+    .addEventListener('change',
+    desenharGrafico);
+}
+
+function desenharGrafico(){
+
+    const pergunta =
+    document.getElementById('perguntaSelect').value;
+
+    let contagem = {};
+
+    respostas.forEach(r => {
+
+        if(!r) return;
+
+        let resposta;
+
+        if(pergunta === 'gosto'){
+
+            resposta = r[3]?.replace(/"/g,'').trim();
+
+            if(resposta){
+                contagem[resposta] =
+                (contagem[resposta] || 0) + 1;
+            }
+
+        }
+
+        if(pergunta === 'linguagens'){
+
+            resposta =
+            r[4]?.replace(/"/g,'').trim();
+
+            if(resposta){
+
+                resposta.split(',')
+                .forEach(item => {
+
+                    item = item.trim();
+
+                    contagem[item] =
+                    (contagem[item] || 0) + 1;
+                });
+            }
+        }
+
+        if(pergunta === 'algoritmo'){
+
+            resposta =
+            r[6]?.replace(/"/g,'').trim();
+
+            if(resposta){
+
+                contagem[resposta] =
+                (contagem[resposta] || 0) + 1;
+            }
+        }
+
+    });
+
+    let dados = [['Resposta','Quantidade']];
+
+    Object.entries(contagem)
+    .forEach(([k,v]) => {
+
+        dados.push([k,v]);
+    });
+
+    const data =
+    google.visualization.arrayToDataTable(dados);
+
+    const options = {
+
+        pieHole:0.35,
+        legend:{
+            position:'right'
+        },
+
+        chartArea:{
+            width:'85%',
+            height:'85%'
+        }
+    };
+
+    const chart =
+    new google.visualization.PieChart(
+        document.getElementById('grafico')
+    );
+
+    chart.draw(data, options);
+}
+
+setInterval(carregarDados, 30000);
+
+</script>
+
+</body>
+</html>
