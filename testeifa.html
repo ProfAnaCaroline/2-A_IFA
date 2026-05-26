@@ -237,39 +237,107 @@ RESUMO SAMUEL
 </div>
 
 <script>
-
 google.charts.load('current', {
-    packages:['corechart']
+    packages: ['corechart']
 });
 
-google.charts.setOnLoadCallback(carregarDados);
+google.charts.setOnLoadCallback(iniciarDashboard);
 
 const sheetURL =
 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSAD-j7vzLTjXVse3wL9cB6KTf-V-7D1wYYZElpWaJJS_Fxy-2uKdsHajsB8LEjnGbA8JULgQVhMdnF/pub?output=csv';
 
 let respostas = [];
 
-async function carregarDados(){
-
-    const response = await fetch(sheetURL);
-    const texto = await response.text();
-
-    const linhas =
-    texto.split('\n').map(linha =>
-        linha.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g)
-    );
-
-    respostas = linhas.slice(1);
-
-    desenharGrafico();
+async function iniciarDashboard() {
+    await carregarDados();
 
     document
-    .getElementById('perguntaSelect')
-    .addEventListener('change',
-    desenharGrafico);
+        .getElementById('perguntaSelect')
+        .addEventListener('change', desenharGrafico);
+
+    // Atualiza automaticamente a cada 30 segundos
+    setInterval(carregarDados, 30000);
 }
 
-function desenharGrafico(){
+async function carregarDados() {
+
+    try {
+
+        const response = await fetch(sheetURL);
+
+        const csv = await response.text();
+
+        // Parser CSV CORRETO para Google Forms
+        respostas = parseCSV(csv);
+
+        // remove cabeçalho
+        respostas.shift();
+
+        desenharGrafico();
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar CSV:", erro);
+
+    }
+}
+
+function parseCSV(texto) {
+
+    const linhas = [];
+    let linha = [];
+    let valor = '';
+    let dentroAspas = false;
+
+    for (let i = 0; i < texto.length; i++) {
+
+        const char = texto[i];
+        const prox = texto[i + 1];
+
+        if (char === '"') {
+
+            if (dentroAspas && prox === '"') {
+
+                valor += '"';
+                i++;
+
+            } else {
+
+                dentroAspas = !dentroAspas;
+            }
+
+        } else if (char === ',' && !dentroAspas) {
+
+            linha.push(valor);
+            valor = '';
+
+        } else if ((char === '\n' || char === '\r') && !dentroAspas) {
+
+            if (valor || linha.length) {
+
+                linha.push(valor);
+                linhas.push(linha);
+
+                linha = [];
+                valor = '';
+            }
+
+        } else {
+
+            valor += char;
+        }
+    }
+
+    if (valor || linha.length) {
+
+        linha.push(valor);
+        linhas.push(linha);
+    }
+
+    return linhas;
+}
+
+function desenharGrafico() {
 
     const pergunta =
     document.getElementById('perguntaSelect').value;
@@ -278,45 +346,47 @@ function desenharGrafico(){
 
     respostas.forEach(r => {
 
-        if(!r) return;
+        let resposta = '';
 
-        let resposta;
+        // COLUNA 4
+        if (pergunta === 'gosto') {
 
-        if(pergunta === 'gosto'){
+            resposta = r[3]?.trim();
 
-            resposta = r[3]?.replace(/"/g,'').trim();
+            if (resposta) {
 
-            if(resposta){
                 contagem[resposta] =
                 (contagem[resposta] || 0) + 1;
             }
-
         }
 
-        if(pergunta === 'linguagens'){
+        // COLUNA 5 (caixas de seleção)
+        if (pergunta === 'linguagens') {
 
-            resposta =
-            r[4]?.replace(/"/g,'').trim();
+            resposta = r[4]?.trim();
 
-            if(resposta){
+            if (resposta) {
 
                 resposta.split(',')
                 .forEach(item => {
 
                     item = item.trim();
 
-                    contagem[item] =
-                    (contagem[item] || 0) + 1;
+                    if(item){
+
+                        contagem[item] =
+                        (contagem[item] || 0) + 1;
+                    }
                 });
             }
         }
 
-        if(pergunta === 'algoritmo'){
+        // COLUNA 7
+        if (pergunta === 'algoritmo') {
 
-            resposta =
-            r[6]?.replace(/"/g,'').trim();
+            resposta = r[6]?.trim();
 
-            if(resposta){
+            if (resposta) {
 
                 contagem[resposta] =
                 (contagem[resposta] || 0) + 1;
@@ -325,27 +395,35 @@ function desenharGrafico(){
 
     });
 
-    let dados = [['Resposta','Quantidade']];
+    const dados = [['Resposta', 'Quantidade']];
 
-    Object.entries(contagem)
-    .forEach(([k,v]) => {
+    for (const chave in contagem) {
 
-        dados.push([k,v]);
-    });
+        dados.push([
+            chave,
+            contagem[chave]
+        ]);
+    }
 
     const data =
     google.visualization.arrayToDataTable(dados);
 
     const options = {
 
-        pieHole:0.35,
-        legend:{
-            position:'right'
+        title:
+        document.getElementById(
+        'perguntaSelect'
+        ).selectedOptions[0].text,
+
+        pieHole: 0.35,
+
+        legend: {
+            position: 'right'
         },
 
-        chartArea:{
-            width:'85%',
-            height:'85%'
+        chartArea: {
+            width: '90%',
+            height: '80%'
         }
     };
 
@@ -356,9 +434,6 @@ function desenharGrafico(){
 
     chart.draw(data, options);
 }
-
-setInterval(carregarDados, 30000);
-
 </script>
 
 </body>
